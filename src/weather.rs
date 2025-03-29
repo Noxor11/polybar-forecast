@@ -15,7 +15,7 @@ impl<'a> OpenWeatherMap<'a> {
         OpenWeatherMap { config }
     }
 
-    pub fn get_info(&self, query: QueryType) -> Result<WeatherInfo, Error> {
+    pub async fn get_info(&self, query: QueryType) -> Result<WeatherInfo, Error> {
         let params = QueryParams {
             app_id: &self.config.api_key,
             city_id: &self.config.city_id,
@@ -28,13 +28,12 @@ impl<'a> OpenWeatherMap<'a> {
         match query {
             QueryType::Current => {
                 let url = "http://api.openweathermap.org/data/2.5/weather?".to_owned() + &qs;
-                let res = reqwest::get(&url)?.json()?;
-
+                let res = reqwest::get(&url).await?.json().await?;
                 parse_current(res).ok_or(Error::InvalidResponse)
             }
             QueryType::Forecast => {
                 let url = "http://api.openweathermap.org/data/2.5/forecast?".to_owned() + &qs;
-                let res = reqwest::get(&url)?.json()?;
+                let res = reqwest::get(&url).await?.json().await?;
 
                 parse_forecast(res).ok_or(Error::InvalidResponse)
             }

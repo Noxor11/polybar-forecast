@@ -6,8 +6,9 @@ use std::process;
 use types::{Configuration, Error};
 use weather::{OpenWeatherMap, Output, QueryType};
 
-fn main() {
-    match get_forecast() {
+#[tokio::main]
+async fn main() {
+    match get_forecast().await {
         Ok(forecast) => println!("{}", forecast),
         Err(e) => {
             // Line break prevents massive errors from trashing the bar,
@@ -18,11 +19,11 @@ fn main() {
     }
 }
 
-fn get_forecast() -> Result<String, Error> {
+async fn get_forecast() -> Result<String, Error> {
     let config = Configuration::new()?;
     let owm = OpenWeatherMap::new(&config);
-    let current = owm.get_info(QueryType::Current)?;
-    let forecast = owm.get_info(QueryType::Forecast)?;
+    let current = owm.get_info(QueryType::Current).await?;
+    let forecast = owm.get_info(QueryType::Forecast).await?;
 
     Output::render(&config.display, current, forecast)
 }
